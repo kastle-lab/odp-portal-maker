@@ -2,7 +2,7 @@
 import glob
 from os import unlink
 
-# Literal path to the wiki
+# Literal path to the wiki leave empty if this file is in the wiki
 PATH_TO_WIKI = ""
 
 
@@ -18,7 +18,7 @@ def main():
         print(f"Deleting: {file}")
 
         try:
-            unlink(PATH_TO_WIKI + "/" + file)
+            unlink(PATH_TO_WIKI + file)
             print(f"Deleted: {file}")
 
         except PermissionError:
