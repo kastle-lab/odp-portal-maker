@@ -3,29 +3,30 @@ import glob
 from os import unlink
 
 # Literal path to the wiki leave empty if this file is in the wiki
-PATH_TO_WIKI = ""
+ROOT_DIR = 'C:/Users/Gilbert/Codes/wiki/'
 
 
 def main():
     files = glob.glob(
-        "**/._*",
-        root_dir=PATH_TO_WIKI,
+        '**/._*',
+        root_dir=ROOT_DIR,
         recursive=True,
         include_hidden=True
     )
 
     for file in files:
-        print(f"Deleting: {file}")
+        print(f'Deleting: {file}')
 
         try:
-            unlink(PATH_TO_WIKI + file)
-            print(f"Deleted: {file}")
+            unlink(ROOT_DIR + file)
+            print(f'Deleted: {file}')
 
         except PermissionError:
-            print("Permission denied")
+            print('Permission denied')
 
         except:
-            print("File can not be removed")
+            print('File can not be removed')
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()
