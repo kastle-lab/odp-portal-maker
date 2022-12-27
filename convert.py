@@ -1,21 +1,19 @@
+# Libraries
 import markdownify
 import glob
-from sanitize import sanitize
 from os import makedirs, path
 
+# Modules
+from sanitize import sanitize
+from utils import read_file
+
 # Literal path to the wiki leave empty if this file is in the wiki
-ROOT_DIR = 'C:/Users/Gilbert/Codes/wiki/'
-TARGET_DIR = 'C:/Users/Gilbert/Codes/md/'
-
-
-def read_file(filename):
-    with open(filename, 'r', encoding="utf8") as file:
-        lines = file.readlines()
-        return ''.join(lines)
+ROOT_DIR = './example/'
+TARGET_DIR = './md/'
 
 
 def main():
-    print('Reading directory...')
+    print('Scanning directory...')
     files = glob.glob(
         '**/*.html',
         root_dir=ROOT_DIR,
@@ -33,7 +31,9 @@ def main():
         print('Converting...')
         md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
 
+        # Creates directory recursively if it doesn't exist
         makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)
+
         with open(TARGET_DIR + file.replace('.html', '.md'), 'w', encoding="utf8") as write_file:
             write_file.write(md.strip())
 
