@@ -1,25 +1,18 @@
+# Libraries
 import re
 
-
-# Runs only when being run from the terminal
-
-
-def main():
-
-    file = read_file('ODPA.html')
-
-    sanitize(file)
-
-    with open('ODPAREBUILD.html', 'w') as write_file:
-
-        write_file.write(rebuild)
-
-        print('Done!')
+# Modules
+from utils import read_file
 
 
 def sanitize(file):
     """
-    Sanitizes the input
+        Sanitizes the input by using regex to
+        first query for the actual content
+        then removing tables, scripts, and styles
+
+        Parameters:
+        file (str): the entire file read as a string
     """
 
     table_removed = re.sub(r'(<table.*?>)([\s\S]*?)(<\/table>)', '', file, flags=re.M | re.I)
@@ -49,50 +42,3 @@ def sanitize(file):
     """
 
     return rebuild
-
-
-def read_file(filename):
-
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-
-        return ''.join(lines)
-
-
-if __name__ == '__main__':
-    main()
-
-
-# Maybe useful later
-
-
-# def remove_styles():
-
-#     lines = read_file('ODPA.html')
-
-
-#     cleaned = re.sub(r'(<style.*?>)([\s\S]*?)(<\/style>)', '', lines, flags=re.M | re.I)
-
-
-#     with open('ODPA.html', 'w') as write_file:
-
-#         write_file.write(cleaned)
-
-
-# def remove_attr():
-
-#     lines = read_file('ODPA.html')
-
-
-#     id_removed = re.sub(r'(id=(\"|\')).+?(\"|\')', '', lines, flags=re.M | re.I)
-
-
-#     class_removed = re.sub(r'(class=(\"|\')).+?(\"|\')', '', id_removed, flags=re.M | re.I)
-
-
-#     style_removed = re.sub(r'(style=(\"|\')).+?(\"|\')', '', class_removed, flags=re.M | re.I)
-
-
-#     with open('ODPA.html', 'w') as write_file:
-
-#         write_file.write(style_removed)
