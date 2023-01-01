@@ -3,11 +3,11 @@ import re
 from pathlib import Path
 from os import makedirs, path, unlink, rename, getcwd
 from shutil import copy2, copytree, rmtree
-from utils import read_file
+from utils import read_file, cleanup_dir
 from progress.bar import Bar
 
 
-def cleandir(ROOT_DIR='./md/', TARGET_DIR='./md/'):
+def cleandir(ROOT_DIR='./md/', TARGET_DIR='./md/') -> None:
     """
         walks through all the directories,
         move them accordingly first, then it will find all the files
@@ -55,17 +55,7 @@ def cleandir(ROOT_DIR='./md/', TARGET_DIR='./md/'):
 
     print('Cleaning up...')
 
-    dirs = sorted(
-        Path('./').glob('**'),
-        key=lambda p: len(str(p)),
-        reverse=True,
-    )
-
-    for directory in dirs:
-        try:
-            directory.rmdir()  # delete directory if it's empty
-        except OSError:
-            continue  # if it's not empty, then just ignore
+    cleanup_dir(ROOT_DIR)
 
     print('Done!')
 

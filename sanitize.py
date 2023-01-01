@@ -5,7 +5,7 @@ import re
 from utils import read_file
 
 
-def sanitize(file):
+def sanitize(file: str) -> str:
     """
         Sanitizes the input by using regex to
         first query for the actual content
