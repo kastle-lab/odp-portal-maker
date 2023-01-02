@@ -5,13 +5,10 @@ from os import makedirs, rmdir
 
 def main():
 
-    # makedirs('./example/temp/')
-    # convert('./example', './example/temp', cleanup=True)
+    convert('./example', './out')
 
-    print('cleandir')
-    cleandir('./example/temp', './example')
+    cleandir('./out')
 
-    rmdir('./example/temp/')
 
 
 if __name__ == '__main__':

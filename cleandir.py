@@ -7,7 +7,7 @@ from utils import read_file, cleanup_dir
 from progress.bar import Bar
 
 
-def cleandir(ROOT_DIR='./md/', TARGET_DIR='./md/') -> None:
+def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
     """
         walks through all the directories,
         move them accordingly first, then it will find all the files
@@ -15,7 +15,8 @@ def cleandir(ROOT_DIR='./md/', TARGET_DIR='./md/') -> None:
         URL encoded string for ":" (colon), then creates it into a
         #folder and move the files and rename them accordingly. 
     """
-
+    TARGET_DIR = ROOT_DIR if TARGET_DIR is None else TARGET_DIR
+    
     ROOT_DIR = str(Path(ROOT_DIR).resolve()) + '/'
     TARGET_DIR = str(Path(TARGET_DIR).resolve()) + '/'
 
