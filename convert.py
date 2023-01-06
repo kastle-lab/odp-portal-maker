@@ -3,6 +3,7 @@ import markdownify
 import glob
 from os import makedirs, path, unlink
 from pathlib import Path
+from shutil import copy2
 
 # Modules
 from sanitize import sanitize
@@ -26,7 +27,7 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
 
     print('Scanning directory...')
     files = glob.glob(
-        '**/*.html',
+        '**/*.*',
         root_dir=ROOT_DIR,
         recursive=True,
         include_hidden=True
@@ -35,30 +36,48 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
     bar = Bar('Converting', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for idx, file in enumerate(files):
-        try:
 
-            html = read_file(ROOT_DIR + file)
+        # If it's not an html file, don't convert it just move it
+        if not file.endswith('.html'):
 
-            # print('Sanitizing file...')
-            sanitized = sanitize(html)
-
-            # print('Converting...')
-            md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
+            orig_path = resolve_path(ROOT_DIR + file)
+            target_path = resolve_path(TARGET_DIR + file)
 
             # Creates directory recursively if it doesn't exist
             makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)
 
-            # Write file into target directory and write it as markdown
-            with open(TARGET_DIR + file.replace('.html', '.md'), 'w', encoding="utf8") as write_file:
-                write_file.write(md.strip())
+            if not (path.isdir(orig_path) or path.exists(target_path)):
+                # Copy the file into the target
+                copy2(orig_path, target_path)
 
             bar.next()
-        except FileNotFoundError:
-            print('Cannot find file or', sep=' ')
-            print('file has illegal character in name that results in the os not able to resolve the file:')
-            print(file)
-            print('Skipping...')
-            continue
+
+        else:
+            try:
+
+                html = read_file(ROOT_DIR + file)
+
+                # print('Sanitizing file...')
+                sanitized = sanitize(html)
+
+                # print('Converting...')
+                md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
+
+                # Creates directory recursively if it doesn't exist
+                makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)
+
+                # Write file into target directory and write it as markdown
+                with open(TARGET_DIR + file.replace('.html', '.md'), 'w', encoding="utf-8") as write_file:
+                    write_file.write(md.strip())
+                bar.next()
+
+            except FileNotFoundError:
+                print('\nCannot find file or', end=' ')
+                print('file has illegal character in name that results in the os not able to resolve the file:')
+                print(file)
+                print('Skipping...')
+                bar.next()
+                continue
 
     bar.finish()
 

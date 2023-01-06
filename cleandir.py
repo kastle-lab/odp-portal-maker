@@ -16,7 +16,7 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
         #folder and move the files and rename them accordingly. 
     """
     TARGET_DIR = ROOT_DIR if TARGET_DIR is None else TARGET_DIR
-    
+
     ROOT_DIR = str(Path(ROOT_DIR).resolve()) + '/'
     TARGET_DIR = str(Path(TARGET_DIR).resolve()) + '/'
 
@@ -42,6 +42,7 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
 
         # If it's a directory or it already exists, then ignore
         if path.isdir(orig_path) or path.exists(target_path):
+            cleanup_bar.next()
             continue
 
         # Copy the file into the target

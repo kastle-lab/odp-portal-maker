@@ -12,7 +12,7 @@ def read_file(filename: str) -> str:
     """
 
     # Open file using the absolute path resolved by pathlib
-    with open(Path(filename).resolve(), 'r', encoding='utf-8') as file:
+    with open(resolve_path(filename), 'r', encoding='utf8') as file:
         lines = file.readlines()
 
         return ''.join(lines)
