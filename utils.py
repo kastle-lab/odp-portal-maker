@@ -1,6 +1,6 @@
 import glob
 from pathlib import Path
-from os import makedirs
+import os
 
 
 def read_file(filename: str) -> str:

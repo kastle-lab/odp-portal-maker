@@ -22,8 +22,8 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
         ROOT_DIR (str): Root directory path to the wiki
         TARGET_DIR (str): Output directory
     """
-    ROOT_DIR = str(Path(ROOT_DIR).resolve()) + '/'
-    TARGET_DIR = str(Path(TARGET_DIR).resolve()) + '/'
+    ROOT_DIR = resolve_path(ROOT_DIR)
+    TARGET_DIR = resolve_path(TARGET_DIR)
 
     print('Scanning directory...')
     files = glob.glob(
@@ -40,8 +40,8 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
         # If it's not an html file, don't convert it just move it
         if not file.endswith('.html'):
 
-            orig_path = resolve_path(ROOT_DIR + file)
-            target_path = resolve_path(TARGET_DIR + file)
+            orig_path = ROOT_DIR + file
+            target_path = TARGET_DIR + file
 
             # Creates directory recursively if it doesn't exist
             makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)

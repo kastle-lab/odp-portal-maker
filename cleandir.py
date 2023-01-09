@@ -1,10 +1,13 @@
+# Libraries
 import glob
 import re
 from pathlib import Path
 from os import makedirs, path, unlink, rename, getcwd
 from shutil import copy2, copytree, rmtree
-from utils import read_file, cleanup_dir
 from progress.bar import Bar
+
+# Modules
+from utils import read_file, cleanup_dir, resolve_path
 
 
 def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
@@ -17,8 +20,8 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
     """
     TARGET_DIR = ROOT_DIR if TARGET_DIR is None else TARGET_DIR
 
-    ROOT_DIR = str(Path(ROOT_DIR).resolve()) + '/'
-    TARGET_DIR = str(Path(TARGET_DIR).resolve()) + '/'
+    ROOT_DIR = resolve_path(ROOT_DIR)
+    TARGET_DIR = resolve_path(ROOT_DIR)
 
     paths = glob.glob(
         '**/*.*',
@@ -58,8 +61,6 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
     print('Cleaning up...')
 
     cleanup_dir(ROOT_DIR)
-
-    print('Done!')
 
 
 if __name__ == '__main__':

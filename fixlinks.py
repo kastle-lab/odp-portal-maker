@@ -9,6 +9,17 @@ from utils import read_file, resolve_path
 
 
 def fixlinks(ROOT_DIR='./out/'):
+    """
+        Fixes all the links including relative paths.
+        It will ignore hyperlinks. The method will detect
+        the directory depth and apply relativity accordingly
+        to each links.
+
+        Parameter:
+        ROOT_DIR (str): Root directory. Defaults './out/'
+    """
+    ROOT_DIR = resolve_path(ROOT_DIR)
+
     files = glob.glob(
         '**/*.*',
         root_dir=ROOT_DIR,
@@ -70,14 +81,12 @@ def fixlinks(ROOT_DIR='./out/'):
 
                 file = file.replace(f'{link}', replacement_link)
 
-            with open(resolve_path(ROOT_DIR + filename), 'w', encoding="utf-8") as write_file:
+            with open(ROOT_DIR + filename, 'w', encoding="utf-8") as write_file:
                 write_file.write(file)
 
         bar.next()
 
     bar.finish()
-
-    # 2nd Step - Fixing the relative links
 
 
 if __name__ == '__main__':
