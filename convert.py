@@ -57,10 +57,8 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
 
                 html = read_file(ROOT_DIR + file)
 
-                # print('Sanitizing file...')
                 sanitized = sanitize(html)
 
-                # print('Converting...')
                 md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
 
                 # Creates directory recursively if it doesn't exist
