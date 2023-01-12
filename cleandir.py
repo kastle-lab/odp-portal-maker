@@ -20,8 +20,8 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
     """
     TARGET_DIR = ROOT_DIR if TARGET_DIR is None else TARGET_DIR
 
-    ROOT_DIR = resolve_path(ROOT_DIR)
-    TARGET_DIR = resolve_path(ROOT_DIR)
+    ROOT_DIR = resolve_path(ROOT_DIR, True)
+    TARGET_DIR = resolve_path(ROOT_DIR, True)
 
     paths = glob.glob(
         '**/*.*',

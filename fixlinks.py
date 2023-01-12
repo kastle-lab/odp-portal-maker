@@ -18,7 +18,7 @@ def fixlinks(ROOT_DIR='./out/'):
         Parameter:
         ROOT_DIR (str): Root directory. Defaults './out/'
     """
-    ROOT_DIR = resolve_path(ROOT_DIR)
+    ROOT_DIR = resolve_path(ROOT_DIR, True)
 
     files = glob.glob(
         '**/*.*',

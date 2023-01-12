@@ -18,17 +18,24 @@ def read_file(filename: str) -> str:
         return ''.join(lines)
 
 
-def resolve_path(path: str) -> str:
+def resolve_path(path: str, directory: bool = False) -> str:
     """
         Ensures the path that was given
         can be consistent throughout the
         scripts, even if the given path
         is a relative one.
+
+        If directory is True, then it will
+        check for directories and if it
+        doesn't exist, it will create one
     """
     p = Path(path)
 
+    if directory and not p.is_dir():
+        os.makedirs(p)
+
     # Add '/' for directories only
-    return str(p.resolve()) + ('/' if p.is_dir() else '')
+    return str(p.resolve()) + ('/' if directory else '')
 
 
 def cleanup_dir(root: str) -> None:

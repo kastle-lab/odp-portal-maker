@@ -22,8 +22,8 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
         ROOT_DIR (str): Root directory path to the wiki
         TARGET_DIR (str): Output directory
     """
-    ROOT_DIR = resolve_path(ROOT_DIR)
-    TARGET_DIR = resolve_path(TARGET_DIR)
+    ROOT_DIR = resolve_path(ROOT_DIR, True)
+    TARGET_DIR = resolve_path(TARGET_DIR, True)
 
     print('Scanning directory...')
     files = glob.glob(
