@@ -37,7 +37,7 @@ def fixlinks(ROOT_DIR='./out/'):
             continue
 
         if filename.endswith('.md'):
-            dir_dept = filename.count('/') or filename.count('\\')
+            dir_depth = filename.count('/') or filename.count('\\')
 
             file = read_file(ROOT_DIR + filename)
 
@@ -59,7 +59,7 @@ def fixlinks(ROOT_DIR='./out/'):
 
                 # Makes sure that the path string is normalized according to
                 # the os being used
-                replacement_link = path.normpath(replacement_link.replace('.md', ''))
+                replacement_link = path.normpath(replacement_link)
 
                 """ 2nd Step - fix the relative paths after file directory cleaning """
 
@@ -74,7 +74,8 @@ def fixlinks(ROOT_DIR='./out/'):
 
                 # the replace would only run on Windows filesystem, since
                 # Windows uses the \ for directories
-                replacement_link = ('../' * dir_dept) + linked_file[0].replace('\\', '/')
+                replacement_link = ('../' * dir_depth) + linked_file[0].replace('\\', '/')
+                replacement_link = replacement_link.replace('.md', '')
 
                 file = file.replace(f'{link}', replacement_link)
 
