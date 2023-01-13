@@ -37,9 +37,6 @@ def fixlinks(ROOT_DIR='./out/'):
             continue
 
         if filename.endswith('.md'):
-            # if 'Edew.jpg.md' not in filename:
-            # continue
-
             dir_dept = filename.count('/') or filename.count('\\')
 
             file = read_file(ROOT_DIR + filename)
@@ -52,7 +49,7 @@ def fixlinks(ROOT_DIR='./out/'):
             for link in links:
 
                 """ 1st Step - rewrite all the %253A to / """
-                replacement_link = link.replace('.html', '.md')
+                replacement_link = link.replace('.html', '')
                 replacement_link = replacement_link.replace('%253A', '/')
 
                 # This just makes sure the directory depth is reset just incase
@@ -62,7 +59,7 @@ def fixlinks(ROOT_DIR='./out/'):
 
                 # Makes sure that the path string is normalized according to
                 # the os being used
-                replacement_link = path.normpath(replacement_link)
+                replacement_link = path.normpath(replacement_link.replace('.md', ''))
 
                 """ 2nd Step - fix the relative paths after file directory cleaning """
 
@@ -90,4 +87,4 @@ def fixlinks(ROOT_DIR='./out/'):
 
 
 if __name__ == '__main__':
-    fixlinks()
+    fixlinks('../odp-portal-test')
