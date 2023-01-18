@@ -1,6 +1,8 @@
 # Libraries
 import markdownify
 import glob
+import re
+import argparse
 from os import makedirs, path, unlink
 from pathlib import Path
 from shutil import copy2
@@ -11,9 +13,9 @@ from utils import read_file, resolve_path, cleanup_dir
 from progress.bar import Bar
 
 
-def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
+def convert(ROOT_DIR, TARGET_DIR) -> None:
     """
-        First it will use the sanitize module and 
+        First it will use the sanitize module and
         cleans up the html down to the actual content
         Then it converts the sanitized html into markdown
         and writes the file into the target directory
@@ -61,6 +63,15 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
 
                 md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
 
+                # https://regex101.com/r/UaNeFx/1
+                md = re.sub('Retrieved from \"\[[\s\S]*\)', '', md, re.M)
+
+                # https://regex101.com/r/TXBHRB/1
+                md = re.sub('\[![\s\S]*Related submission, with evaluation history, can be found __here__', '', md, re.M)
+
+                # https://regex101.com/r/njxznp/1
+                md = re.sub('\[Add a reference\]\([\s\S]*\)', '', md, re.M)
+
                 # Creates directory recursively if it doesn't exist
                 makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)
 
@@ -81,4 +92,35 @@ def convert(ROOT_DIR='./example/', TARGET_DIR='./md/') -> None:
 
 
 if __name__ == '__main__':
-    convert()
+    argParser = argparse.ArgumentParser(
+        prog='File Converter',
+        description='Converts html into markdown after sanitation',
+        epilog='Part of ODP Portal Maker script'
+    )
+
+    argParser.add_argument(
+        '-d',
+        '-i',
+        '--input',
+        '--dir',
+        help='root directory of the html files. Can be relative as long as the cwd is in the proper directory'
+    )
+
+    argParser.add_argument(
+        '-o',
+        '--output',
+        help='output directory. Will also be used for directory cleaning and link fixing. If directory doesn\'t exist, it will create it'
+    )
+
+    args = argParser.parse_args()
+
+    root = args.input
+    out = args.output
+
+    if not root:
+        raise ValueError('Missing Argument: root directory')
+
+    if not out:
+        raise ValueError('Missing Argument: output directory')
+
+    convert(root, out)
