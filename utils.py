@@ -35,7 +35,7 @@ def resolve_path(path: str, directory: bool = False) -> str:
         os.makedirs(p)
 
     # Add '/' for directories only
-    return str(p.resolve()) + ('/' if directory else '')
+    return os.path.join(str(p.resolve()), '') if directory else str(p.resolve())
 
 
 def cleanup_dir(root: str) -> None:
