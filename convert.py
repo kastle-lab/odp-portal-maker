@@ -1,5 +1,5 @@
 # Libraries
-import markdownify
+from markdownify import MarkdownConverter, UNDERSCORE
 import glob
 import re
 import argparse
@@ -11,6 +11,29 @@ from shutil import copy2
 from sanitize import sanitize
 from utils import read_file, resolve_path, cleanup_dir
 from progress.bar import Bar
+
+
+# The purpose of this class is so that when
+# a list inside a table is being converted
+# it will just keep it as the html
+class CustomConverter(MarkdownConverter):
+
+    def convert_li(self, el, text, convert_as_inline):
+        if el.parent.parent.name == 'td':
+            return str(el)
+        else:
+            return super().convert_li(el, text, convert_as_inline).replace('\n', '')
+
+    # These two will keep the table rows into one line to avoid ugly looking tables
+    def convert_td(self, el, text, convert_as_inline):
+        return ' ' + text.replace('\n', '') + ' |'
+
+    def convert_th(self, el, text, convert_as_inline):
+        return ' ' + text.replace('\n', '') + ' |'
+
+
+def markdownify(html, **options):
+    return CustomConverter(**options).convert(html)
 
 
 def convert(ROOT_DIR, TARGET_DIR) -> None:
@@ -61,16 +84,16 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
 
                 sanitized = sanitize(html)
 
-                md = markdownify.markdownify(sanitized, heading_style='atx', strong_em_symbol=markdownify.UNDERSCORE)
+                md = markdownify(sanitized, heading_style='atx', strong_em_symbol=UNDERSCORE)
 
                 # https://regex101.com/r/UaNeFx/1
-                md = re.sub('Retrieved from \"\[[\s\S]*\)', '', md, re.M)
+                # md = re.sub('Retrieved from \"\[[\s\S]*\)', '', md, re.M)
 
                 # https://regex101.com/r/TXBHRB/1
-                md = re.sub('\[![\s\S]*Related submission, with evaluation history, can be found __here__', '', md, re.M)
+                # md = re.sub('\[![\s\S]*Related submission, with evaluation history, can be found __here__', '', md, re.M)
 
                 # https://regex101.com/r/njxznp/1
-                md = re.sub('\[Add a reference\]\([\s\S]*\)', '', md, re.M)
+                # md = re.sub('\[Add a reference\]\([\s\S]*\)', '', md, re.M)
 
                 # Creates directory recursively if it doesn't exist
                 makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)

@@ -42,7 +42,7 @@ def main(root='./legacy', out='../odp-portal-test'):
 
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser(
-        prog='ODP Portal Maker',
+        prog='main.py',
         description='Converts legacy ODP website into markdown and will clean the directory creating a sane directory tree, while also keeping the relative links, fully functioning',
         epilog='This script will run all the necessary modules for complete conversion'
     )
