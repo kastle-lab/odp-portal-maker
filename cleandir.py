@@ -1,6 +1,7 @@
 # Libraries
 import glob
 import re
+import argparse
 from pathlib import Path
 from os import makedirs, path, unlink, rename, getcwd
 from shutil import copy2, copytree, rmtree
@@ -16,7 +17,7 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
         move them accordingly first, then it will find all the files
         and folders that has "%3A" in it's name, which is just a
         URL encoded string for ":" (colon), then creates it into a
-        #folder and move the files and rename them accordingly. 
+        #folder and move the files and rename them accordingly.
     """
     TARGET_DIR = ROOT_DIR if TARGET_DIR is None else TARGET_DIR
 
@@ -64,4 +65,4 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
 
 
 if __name__ == '__main__':
-    cleandir()
+    print('This file cannot be run as it\'s own script.')

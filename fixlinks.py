@@ -1,6 +1,7 @@
 # Libraries
 import re
 import glob
+import argparse
 from progress.bar import Bar
 from os import path
 
@@ -88,4 +89,22 @@ def fixlinks(ROOT_DIR='./out/'):
 
 
 if __name__ == '__main__':
-    fixlinks('../odp-portal-test')
+    argParser = argparse.ArgumentParser(
+        prog='Link Fixer',
+        description='Goes through every file in the directory and fixes the relative links'
+    )
+
+    argParser.add_argument(
+        '-d',
+        '-i',
+        '--input',
+        '--dir',
+        help='root directory of the files. Can be relative as long as the cwd is in the proper directory'
+    )
+
+    root = args.input
+
+    if not root:
+        raise ValueError('Missing Argument: root directory')
+
+    fixlinks(root)
