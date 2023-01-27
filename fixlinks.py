@@ -1,11 +1,10 @@
-# Libraries
-import re
-import glob
 import argparse
-from progress.bar import Bar
+import glob
+import re
 from os import path
 
-# Modules
+from progress.bar import Bar
+
 from utils import read_file, resolve_path
 
 
@@ -19,7 +18,7 @@ def fixlinks(ROOT_DIR='./out/'):
         Parameter:
         ROOT_DIR (str): Root directory. Defaults './out/'
     """
-    ROOT_DIR = resolve_path(ROOT_DIR, True)
+    ROOT_DIR = resolve_path(ROOT_DIR)
 
     files = glob.glob(
         '**/*.*',
@@ -91,20 +90,17 @@ def fixlinks(ROOT_DIR='./out/'):
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser(
         prog='Link Fixer',
-        description='Goes through every file in the directory and fixes the relative links'
+        usage='fixlinks.py [-h help] input',
+        description='Goes through every file in the directory and fixes the relative links',
+        epilog='Part of the ODP-Portal-Maker toolset'
     )
 
     argParser.add_argument(
-        '-d',
-        '-i',
-        '--input',
-        '--dir',
+        'input',
         help='root directory of the files. Can be relative as long as the cwd is in the proper directory'
     )
 
+    args = argParser.parse_args()
     root = args.input
-
-    if not root:
-        raise ValueError('Missing Argument: root directory')
 
     fixlinks(root)

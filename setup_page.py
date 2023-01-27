@@ -1,55 +1,47 @@
-import glob
-
 import argparse
+import glob
 import re
-
+import sys
+from os import makedirs, path, unlink
+from pathlib import Path
+from shutil import copy2, copytree, move, rmtree
 
 from progress.bar import Bar
-
 from ruamel.yaml import YAML
 
-from os import makedirs, path, unlink
-
-from shutil import copy2, rmtree, move, copytree
-
-from pathlib import Path
-
-from utils import resolve_path, read_file
+from utils import read_file, resolve_path
 
 
 def move_module(ROOT_DIR, OUT_DIR, module):
-
-    ROOT_DIR = resolve_path(ROOT_DIR, True)
-
-    OUT_DIR = resolve_path(OUT_DIR, True)
-
-    module = resolve_path(ROOT_DIR + module) + '/'
+    # Makes sure these strings are a directory
+    ROOT_DIR = resolve_path(ROOT_DIR)
+    OUT_DIR = resolve_path(OUT_DIR)
+    module = resolve_path(ROOT_DIR + module)
 
     if not path.exists(module):
-
-        raise FileNotFoundError(f'Cannot find module {module}. Check the correctness of the path.')
+        raise FileNotFoundError(f'Cannot find module {module}. Check the path.')
 
     files = glob.glob(
-
         '**/*.*',
-
         recursive=True,
         root_dir=module,
     )
 
+    # Progress Bar
     bar = Bar('Moving modules', max=len(files),
-
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for file in files:
-
+        # Make sure the parent folder of the file is created (ignored if exists)
         makedirs(OUT_DIR + str(Path(file).parent), exist_ok=True)
 
+        # There are directories with a '.' in it's name
+        # and this prevents any directories from being copied over
         if path.isdir(module + file):
-
             bar.next()
             continue
 
+        # Copy files
         copy2(module + file, OUT_DIR + file)
 
         bar.next()
@@ -58,94 +50,86 @@ def move_module(ROOT_DIR, OUT_DIR, module):
 
 
 def setup_config(OUT_DIR, author='ODPA', desc=None):
+    OUT_DIR = resolve_path(OUT_DIR)
 
-    OUT_DIR = resolve_path(OUT_DIR, True)
-
+    # ensures config file exists
     if not path.exists(resolve_path(OUT_DIR + '_config.yml')):
-
         copy2('./template/_config.yml', OUT_DIR + '_config.yml')
 
     config = read_file(OUT_DIR + '_config.yml')
 
-    try:
+    print('Setting up config files...', end='')
 
-        yaml = YAML()
+    # Start setting up the config file
+    yaml = YAML()
 
-        parsed = yaml.load(config)
-        old_collections = dict()
+    parsed = yaml.load(config)
+    old_collections = dict()
 
-        if 'collections' in parsed.keys():
+    # Get collections which is how Jekyll knows to create
+    # a path to render in the web
+    # For Ex:
+    # if Airline is inside collections that means
+    # there will be a link for
+    # https://odpa.github.io/patterns-repository/Airline/
+    if 'collections' in parsed.keys():
+        old_collections = parsed.get('collections')
 
-            old_collections = parsed.get('collections')
+    directories = glob.glob('**', root_dir=OUT_DIR)
 
-        directories = glob.glob('**', root_dir=OUT_DIR)
+    new_collections = dict()
 
-        new_collections = dict()
+    # There are some necessary folders for jekyll and we don't
+    # want to include that in our output
+    # using set to subtract items inside excludes from directories
+    excludes = set(['_includes', '_layouts', '_posts', 'css'])
+    directories = list(set(directories) - excludes)
 
-        excludes = ['_includes', '_layouts', '_posts', 'css']
+    for directory in directories:
+        if path.isdir(OUT_DIR + directory):
+            new_collections.update({
+                directory: {
+                    'output': True
+                }
+            })
 
-        for directory in directories:
+    # Dictionary union https://peps.python.org/pep-0584/
+    parsed['collections'] = new_collections | old_collections
+    parsed['author']['name'] = author if author else 'ODPA'
+    parsed['excludes'] = ['public', '_layout']
 
-            # There are some necessary folders for jekyll and we don't
+    # If there is a new description specified
+    # add it into the config
+    if desc:
+        parsed['description'] = desc
 
-            # want to include that in our output
+    # A friendly reminder
+    header = '# This is a generated config. Do not mess with it unless you know what you are doing!\n\n'
 
-            if directory in excludes:
-                continue
+    # Dump it into file stream
+    with open(OUT_DIR + '_config.yml', 'w') as config_f:
+        yaml.dump(parsed, config_f)
 
-            if path.isdir(OUT_DIR + directory):
-
-                new_collections[directory] = {'output': True}
-
-        # Dictionary union https://peps.python.org/pep-0584/
-
-        parsed['collections'] = new_collections | old_collections
-
-        parsed['author']['name'] = author if author else 'ODPA'
-
-        parsed['excludes'] = ['public', '_layout']
-
-        if desc:
-
-            parsed['description'] = desc
-
-        header = '# This is a generated config. Do not mess with it unless you know what you are doing!\n\n'
-
-        with open(OUT_DIR + '_config.yml', 'w') as config_f:
-
-            yaml.dump(parsed, config_f)
-
-    except yaml.YAMLError as err:
-        print(err)
+    print('Done!')
 
 
 def setup_template(OUT_DIR):
-
-    OUT_DIR = resolve_path(OUT_DIR, True)
+    OUT_DIR = resolve_path(OUT_DIR)
 
     templates = glob.glob('**/', recursive=True, root_dir=resolve_path('./template'))
 
+    print('Copying template files...', end='')
+
     for template in templates:
-
-        # if template in ['_config.yml', 'index.md']:
-
-        # continue
-
         if not path.exists(OUT_DIR + template):
-
-            # makedirs(OUT_DIR + template, exist_ok=True)
-
             copytree(resolve_path('./template/' + template), OUT_DIR + template)
 
     index_template = read_file('./template/index.md')
 
     dirs = glob.glob('**/', recursive=True, root_dir=OUT_DIR)
-
     dirs.append(path.join('/'))
 
     excludes = ['_layouts', 'public']
-
-    # dirs = [path.normpath(d) for d in dirs if not d in excludes]
 
     for directory in dirs:
 
@@ -155,113 +139,95 @@ def setup_template(OUT_DIR):
 
         links = ''
 
+        # Converts the string into a directory-like string
         p = Path(OUT_DIR + directory)
 
         if str(p).replace(OUT_DIR, ''):
-
             links += '[../](../)  \n'
 
         nested = p.glob('*/**/')
 
         files = p.glob('*.*')
 
+        # handles nested links
+        # removes the root of the out directory
         nested = [
-
-
             str(n).replace(OUT_DIR, '').replace(directory, '').replace('\\', '/')
             for n in nested
-
-
         ]
 
+        # weed out hidden files and config files
         nested = [d for d in nested if not d.startswith('_') or not d.startswith('.')]
 
         files = [str(f).replace(OUT_DIR, '').replace(directory, '') for f in files]
 
-        # print(list(files))
-
         for d in nested:
-
+            # Only add 1 deep nested directory
             if d.startswith('.') or d.startswith('_') or d.count('/') >= 1:
                 continue
 
             links += f'[{d}/](./{d}/)  \n'
 
         for f in files:
-
             links += f'[{f}](./{f})  \n'
 
         with open(
-
-
-            resolve_path(OUT_DIR + directory, True) + 'index.md', 'w', encoding='utf-8'
-
-
+            resolve_path(OUT_DIR + directory) + 'index.md', 'w', encoding='utf-8'
         ) as write_f:
-
             write_f.write(index_template + '  \n' + links)
+
+    print('Done!')
 
 
 def import_required_files(ROOT_DIR, OUT_DIR, module):
+    ROOT_DIR = resolve_path(ROOT_DIR)
+    OUT_DIR = resolve_path(OUT_DIR)
+    OUT_DIR = resolve_path(OUT_DIR + 'public')
+    module = resolve_path(ROOT_DIR + module)
 
-    ROOT_DIR = resolve_path(ROOT_DIR, True)
-
-    OUT_DIR = resolve_path(OUT_DIR, True)
-
-    OUT_DIR = resolve_path(OUT_DIR + 'public', True)
-
-    module = resolve_path(ROOT_DIR + module) + '/'
-
+    # Gets every file
     files = glob.glob(
-
-
         '**/*.*',
-
-
         recursive=True,
-
-
         root_dir=ROOT_DIR
     )
 
+    # Ignore any files that is not a markdown
     files = [f for f in files if not f.endswith('.md')]
 
     out_files = glob.glob(
-
         '**/*.md',
-
         recursive=True,
         root_dir=module
     )
 
     bar = Bar('Importing necessary files', max=len(files),
-
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for file in out_files:
-
         if path.isdir(file):
-
             bar.next()
             continue
 
+        # Grabs all markdown links
         # To view how the regex works: https://regex101.com/r/oTWiTP/1
-
         links = re.findall(r'(?<=\]\().*?(?=\s|\))', read_file(module + file), flags=re.MULTILINE)
 
         for link in links:
-
             # https://regex101.com/r/vk2ZEy/1
-
             if link.endswith('.md') or not re.search(r'\.[\w]*$', link):
                 continue
 
             req_file = link.replace('../', '')
 
+            # normalize the path
             req_file = path.normpath(req_file)
 
             orig_loc = resolve_path(ROOT_DIR + req_file)
 
+            # If file doesn't exist in the original directory
+            # (which means it's a url) or the path is a directory
+            # then skip over
             if not path.exists(orig_loc) or path.isdir(orig_loc):
                 continue
 
@@ -275,128 +241,88 @@ def import_required_files(ROOT_DIR, OUT_DIR, module):
 
 
 if __name__ == '__main__':
-
     argParser = argparse.ArgumentParser(
-
-        prog='ODP Portal Config Generator',
-
-        description='Generates Portal config for GitHub Pages',
+        prog='ODP Portal Module & Config Generator',
+        usage='setup_page.py [-h help] [--force] input module output',
+        description='Moves specified module from converted html and generates portal config for GitHub Pages',
     )
 
     argParser.add_argument(
-
-        '-d',
-
-        '-i',
-
-        '--input',
-
-        '--dir',
-
-        help='root directory of the converted markdown files',
+        'input',
+        help='root directory of the converted markdown files (can be relative or absolute)',
     )
 
     argParser.add_argument(
-
-        '-m',
-
-        '--module',
-
-        help='module to move from root directory to output directory'
+        'module',
+        help='module to move from root directory to output directory (not a path, should be the name of the folder inside the root)'
     )
 
     argParser.add_argument(
-
-        '-o',
-
-        '--output',
-
-        help='output where the page is going to end up.'
+        'output',
+        help='output path where the page is going to end up (can be relative or absolute)'
     )
 
     argParser.add_argument(
-
         '--force',
         action='store_true',
-
         help='if flag is turned on, it will override everything in the output directory and if the directory doesn\'t exist, create one',
     )
 
     args = argParser.parse_args()
 
     root = args.input
-
     out = args.output
-
-    force = args.force
-
     module = args.module
 
-    if not root:
+    force = args.force
+    out = resolve_path(out)
 
-        raise ValueError('Missing Argument: root directory')
-
-    if not out:
-
-        raise ValueError('Missing Argument: output directory')
-
-    if not module:
-
-        raise ValueError('Missing Argument: module to move')
-
-    out = resolve_path(out) + '/'
-
+    # If the '--force' flag is enabled, it will first
+    # warn the user that it will override anything in
+    # the target directory. It thens check if the
+    # target dir exists, and deletes everything in it
     if force:
-
         print(
-
-
-            'WARNING: Force flag is on. It will override the directory if it already exists.'
+            '\n',
+            'WARNING: Force flag is on. It will override the directory if it already exists.',
+            sep=''
         )
-
         input('Press [Enter] to continue... or Terminate process to cancel')
 
         if path.exists(out):
-
             excludes = ['.git']
 
             folders = glob.glob(
-
                 '**/',
-
                 recursive=False,
                 root_dir=out,
-
                 include_hidden=False
             )
 
             for folder in folders:
-
                 rmtree(out + folder)
 
             files = glob.glob(
-
                 '*.*',
-
                 recursive=False,
                 root_dir=out
             )
 
             for file in files:
-
                 unlink(out + file)
 
+        makedirs(out, exist_ok=True)
+
     else:
-
-        if not path.exists(out):
-
-            raise FileNotFoundError(
-
-                f'Cannot find the directory {out}.\nMake sure it exists, or use --force flag to automatically create it')
+        # No force mode
+        try:
+            # Will raise an exception if directory already exist
+            makedirs(out)
+        except FileExistsError as err:
+            # Intercept and give hint to the --force flag
+            raise FileExistsError(f'Directory already {out} exists. Use "--force" to overwrite')
 
     move_module(root, out, module)
-
     setup_config(out)
     setup_template(out)
-
     import_required_files(root, out, module)

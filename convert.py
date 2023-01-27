@@ -47,8 +47,8 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
         ROOT_DIR (str): Root directory path to the wiki
         TARGET_DIR (str): Output directory
     """
-    ROOT_DIR = resolve_path(ROOT_DIR, True)
-    TARGET_DIR = resolve_path(TARGET_DIR, True)
+    ROOT_DIR = resolve_path(ROOT_DIR)
+    TARGET_DIR = resolve_path(TARGET_DIR)
 
     print('Scanning directory...')
     files = glob.glob(
@@ -86,15 +86,6 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
 
                 md = markdownify(sanitized, heading_style='atx', strong_em_symbol=UNDERSCORE)
 
-                # https://regex101.com/r/UaNeFx/1
-                # md = re.sub('Retrieved from \"\[[\s\S]*\)', '', md, re.M)
-
-                # https://regex101.com/r/TXBHRB/1
-                # md = re.sub('\[![\s\S]*Related submission, with evaluation history, can be found __here__', '', md, re.M)
-
-                # https://regex101.com/r/njxznp/1
-                # md = re.sub('\[Add a reference\]\([\s\S]*\)', '', md, re.M)
-
                 # Creates directory recursively if it doesn't exist
                 makedirs(path.dirname(TARGET_DIR + file), exist_ok=True)
 
@@ -117,21 +108,18 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser(
         prog='File Converter',
+        usage='convert.py [-h help] input output',
         description='Converts html into markdown after sanitation',
-        epilog='Part of ODP Portal Maker script'
+        epilog='Part of the ODP-Portal-Maker toolset'
     )
 
     argParser.add_argument(
-        '-d',
-        '-i',
-        '--input',
-        '--dir',
+        'input',
         help='root directory of the html files. Can be relative as long as the cwd is in the proper directory'
     )
 
     argParser.add_argument(
-        '-o',
-        '--output',
+        'output',
         help='output directory. Will also be used for directory cleaning and link fixing. If directory doesn\'t exist, it will create it'
     )
 
@@ -139,11 +127,5 @@ if __name__ == '__main__':
 
     root = args.input
     out = args.output
-
-    if not root:
-        raise ValueError('Missing Argument: root directory')
-
-    if not out:
-        raise ValueError('Missing Argument: output directory')
 
     convert(root, out)

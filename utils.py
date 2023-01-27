@@ -1,6 +1,6 @@
 import glob
-from pathlib import Path
 import os
+from pathlib import Path
 
 
 def read_file(filename: str) -> str:
@@ -18,24 +18,22 @@ def read_file(filename: str) -> str:
         return ''.join(lines)
 
 
-def resolve_path(path: str, directory: bool = False) -> str:
+def resolve_path(path: str) -> str:
     """
         Ensures the path that was given
         can be consistent throughout the
         scripts, even if the given path
         is a relative one.
 
-        If directory is True, then it will
-        check for directories and if it
-        doesn't exist, it will create one
+        It checks if the path is a directory,
+        then adds a trailing '/' if so.
     """
     p = Path(path)
 
-    if directory and not p.is_dir():
-        os.makedirs(p)
-
     # Add '/' for directories only
-    return os.path.join(str(p.resolve()), '') if directory else str(p.resolve())
+    path_str = os.path.join(str(p.resolve()), '') if p.is_dir() else str(p.resolve())
+
+    return path_str
 
 
 def cleanup_dir(root: str) -> None:
