@@ -37,7 +37,8 @@ def fixlinks(ROOT_DIR='./out/'):
             continue
 
         if filename.endswith('.md'):
-            dir_depth = filename.count('/') or filename.count('\\')
+            dir_depth = filename.replace('\\', '/').count('/')
+            # print(filename, dir_depth)
 
             file = read_file(ROOT_DIR + filename)
 
@@ -46,7 +47,12 @@ def fixlinks(ROOT_DIR='./out/'):
             # Essentially, it grabs the markdown link, then grabs only the link and
             # ignore everything else
 
-            for link in links:
+            # Make links into a set to remove duplicates
+            for link in set(links):
+
+                # skip if hyperlink
+                if ('http' in link):
+                    continue
 
                 """ 1st Step - rewrite all the %253A to / """
                 replacement_link = link.replace('.html', '')
@@ -68,7 +74,7 @@ def fixlinks(ROOT_DIR='./out/'):
                 linked_file = [x for x in files if replacement_link in x]
 
                 # If the link is not a file in our file list
-                # then ignore it (most likely a hyperlink)
+                # then ignore it
                 if len(linked_file) == 0:
                     continue
 
@@ -77,7 +83,7 @@ def fixlinks(ROOT_DIR='./out/'):
                 replacement_link = ('../' * dir_depth) + linked_file[0].replace('\\', '/')
                 replacement_link = replacement_link.replace('.md', '')
 
-                file = file.replace(f'{link}', replacement_link)
+                file = file.replace(link, replacement_link)
 
             with open(ROOT_DIR + filename, 'w', encoding="utf-8") as write_file:
                 write_file.write(file)
