@@ -64,4 +64,27 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
 
 
 if __name__ == '__main__':
-    print('This file cannot be run as it\'s own script.')
+    argParser = argparse.ArgumentParser(
+        prog='Directory Cleaner',
+        usage='cleandir.py [-h help] input [output]',
+        description='Crawls throught the input directory and cleans it up. If output is not given, then it will clean it to the input directory',
+        epilog='Part of the ODP-Portal-Maker toolset'
+    )
+
+    argParser.add_argument(
+        'input',
+        help='root directory of the files. Can be relative as long as the cwd is in the proper directory'
+    )
+
+    argParser.add_argument(
+        'output',
+        nargs='?',
+        help='[optional] output directory to put the cleaned directory into. Can be relative. \nIf not provided, then it will use the input as the output',
+        # default=argParser.parse_args().input
+    )
+
+    args = argParser.parse_args()
+    root = args.input
+    out = args.output or root
+
+    cleandir(root, out)
