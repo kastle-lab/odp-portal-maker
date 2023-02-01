@@ -182,7 +182,6 @@ def setup_template(OUT_DIR):
 def import_required_files(ROOT_DIR, OUT_DIR, module):
     ROOT_DIR = resolve_path(ROOT_DIR)
     OUT_DIR = resolve_path(OUT_DIR)
-    OUT_DIR = resolve_path(OUT_DIR + 'public')
     module = resolve_path(ROOT_DIR + module)
 
     # Gets every file
@@ -201,7 +200,7 @@ def import_required_files(ROOT_DIR, OUT_DIR, module):
         root_dir=module
     )
 
-    bar = Bar('Importing necessary files', max=len(files),
+    bar = Bar('Importing necessary files', max=len(out_files),
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for file in out_files:
@@ -209,9 +208,11 @@ def import_required_files(ROOT_DIR, OUT_DIR, module):
             bar.next()
             continue
 
+        file_content = read_file(module + file)
+
         # Grabs all markdown links
         # To view how the regex works: https://regex101.com/r/oTWiTP/1
-        links = re.findall(r'(?<=\]\().*?(?=\s|\))', read_file(module + file), flags=re.MULTILINE)
+        links = re.findall(r'(?<=\]\().*?(?=\s|\))', file_content, flags=re.MULTILINE)
 
         for link in links:
             # https://regex101.com/r/vk2ZEy/1
@@ -224,6 +225,7 @@ def import_required_files(ROOT_DIR, OUT_DIR, module):
             req_file = path.normpath(req_file)
 
             orig_loc = resolve_path(ROOT_DIR + req_file)
+            new_loc = resolve_path(OUT_DIR + req_file)
 
             # If file doesn't exist in the original directory
             # (which means it's a url) or the path is a directory
@@ -233,7 +235,13 @@ def import_required_files(ROOT_DIR, OUT_DIR, module):
 
             makedirs(OUT_DIR + str(Path(req_file).parent), exist_ok=True)
 
-            copy2(ROOT_DIR + req_file, resolve_path(OUT_DIR + req_file))
+            copy2(ROOT_DIR + req_file, new_loc)
+
+            # file_content = file_content.replace(link, path.normpath(req_file).replace('\\', '/'))
+
+
+        # with open(OUT_DIR + file, 'w', encoding='utf-8') as write_f:
+            # write_f.write(file_content)
 
         bar.next()
 
