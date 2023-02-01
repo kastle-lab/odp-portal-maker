@@ -117,5 +117,6 @@ If it somehow necessary to run a specific script indivudually, here are the modu
 
 -   `convert.py`
 -   `fixlinks.py`
+-   `cleandir.py`
 
 and as previously mentioned, each of them have their own help page.
