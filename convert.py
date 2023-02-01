@@ -48,6 +48,8 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
         TARGET_DIR (str): Output directory
     """
     ROOT_DIR = resolve_path(ROOT_DIR)
+    if (not path.isdir(resolve_path(TARGET_DIR))):
+        makedirs(resolve_path(TARGET_DIR) + '/')
     TARGET_DIR = resolve_path(TARGET_DIR)
 
     print('Scanning directory...')
