@@ -1,0 +1,9 @@
+{
+    "remove": [".+@oldid=.*"],
+    "group": [
+        {
+            "directory": "LexicoSyntacticODPs",
+            "regex": ["Lexico_?Syntactic_?ODP.+"]
+        }
+    ]
+}

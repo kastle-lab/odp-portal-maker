@@ -43,9 +43,14 @@ def fixlinks(ROOT_DIR='./out/'):
             file = read_file(ROOT_DIR + filename)
 
             # To view how the regex works: https://regex101.com/r/oTWiTP/1
-            links = re.findall(r'(?<=\]\().*?(?=\s|\))', file, flags=re.MULTILINE)
             # Essentially, it grabs the markdown link, then grabs only the link and
             # ignore everything else
+            md_links = re.findall(r'(?<=\]\().*?(?=\s|\))', file, flags=re.MULTILINE)
+
+            # To view regex: https://regex101.com/r/k572A6/1
+            html_links = re.findall(r'(?<=href=\").+?(?=\")', file, flags=re.MULTILINE)
+
+            links = [*md_links, *html_links]
 
             # Make links into a set to remove duplicates
             for link in set(links):
