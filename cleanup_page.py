@@ -60,7 +60,7 @@ def organize_dir(ROOT_DIR, group_filters):
         dir_name = group['directory']
         regexes = group['regex']
 
-        resolved_dir = resolve_path(ROOT_DIR + dir_name)
+        resolved_dir = resolve_path(ROOT_DIR + dir_name) + '/'
 
         # Create the directory according to the given name
         makedirs(resolved_dir, exist_ok=True)
@@ -82,7 +82,7 @@ def organize_dir(ROOT_DIR, group_filters):
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for file in files:
-        dir_name = resolve_path(ROOT_DIR + file.replace('.md', ''))
+        dir_name = resolve_path(ROOT_DIR + file.replace('.md', '')) + '/'
 
         makedirs(dir_name, exist_ok=True)
 

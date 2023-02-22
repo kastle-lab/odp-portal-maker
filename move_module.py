@@ -138,4 +138,4 @@ if __name__ == '__main__':
             # Intercept and give hint to the --force flag
             raise FileExistsError(f'Directory already {out} exists. Use "--force" to overwrite')
 
-    move_module(root, out, module)
+    move_module(root, out, module, exclude_dir)
