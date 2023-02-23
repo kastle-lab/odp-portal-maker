@@ -43,8 +43,6 @@ def fixlinks(ROOT_DIR='./out/'):
         include_hidden=True
     )
 
-    files = [x for x in files if x not in md_files]
-
     bar = Bar('Fixing links...', max=len(md_files),
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
@@ -55,7 +53,6 @@ def fixlinks(ROOT_DIR='./out/'):
             continue
 
         dir_depth = filename.replace('\\', '/').count('/')
-        # print(filename, dir_depth)
 
         file_content = read_file(ROOT_DIR + filename)
 
@@ -91,6 +88,7 @@ def fixlinks(ROOT_DIR='./out/'):
 
             # Gets the only the filename
             tail = path.split(link)[1]
+            parent_dir = path.split(filename)[0] or ROOT_DIR
 
             # Get the referenced file from the list of files after the cleaning
             # and it should give us the new path location
@@ -98,8 +96,8 @@ def fixlinks(ROOT_DIR='./out/'):
             # instead of trying to follow it's whole pathname
             linked_file = [
                 x for x in files
-                if (replacement_link in x) or
-                (tail in x)
+                if replacement_link in x or
+                re.match(re.compile(re.escape(f'{tail}$')), x)
             ]
 
             # If the link is not a file in our file list
@@ -109,12 +107,26 @@ def fixlinks(ROOT_DIR='./out/'):
 
             same_dir = [
                 x for x in linked_file
-                if (str(Path(filename).parent) in x)
+                if re.match(
+                    re.compile(
+                        re.escape('^' + parent_dir.replace('\\', '/'))
+                    ),
+                    x
+                )
             ]
 
-            # Gets the full directory without including the file
-            parent_dir = path.split(ROOT_DIR + filename)[0]
-            file_loc = ROOT_DIR + same_dir[0] if len(same_dir) > 0 else linked_file[0]
+            # ? The below issue is fixed as of this commit
+            # ! Current issue:
+            # ! When it's not in the same directory
+            # ! the relpath somehow grabs it straight out
+            # ! of the odp-portal-maker (the link is messed up)
+            # ! for no reason...
+
+            # These two lines makes sure that
+            # the path is absolute
+            file_loc = resolve_path(ROOT_DIR + (same_dir or linked_file)[0])
+
+            parent_dir = ROOT_DIR + parent_dir if parent_dir != ROOT_DIR else ROOT_DIR
 
             # Creates a relative path relative to where to original
             # markdown file is located
