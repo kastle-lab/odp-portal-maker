@@ -48,8 +48,8 @@ def organize_dir(ROOT_DIR, group_filters):
         raise NotADirectoryError(f'{ROOT_DIR} is not a directory')
 
     files = glob.glob(
-        '**/*.*',
-        recursive=True,
+        '*.*',
+        recursive=False,
         root_dir=ROOT_DIR
     )
 
@@ -82,9 +82,12 @@ def organize_dir(ROOT_DIR, group_filters):
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
     for file in files:
-        dir_name = resolve_path(ROOT_DIR + file.replace('.md', '')) + '/'
+        if path.isdir(ROOT_DIR + file):
+            continue
 
-        makedirs(dir_name, exist_ok=True)
+        makedirs(ROOT_DIR + file.replace('.md', ''), exist_ok=True)
+
+        dir_name = resolve_path(ROOT_DIR + file.replace('.md', ''))
 
         move(resolve_path(ROOT_DIR + file), resolve_path(dir_name + file))
         bar.next()
