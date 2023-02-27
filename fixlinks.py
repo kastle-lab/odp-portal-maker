@@ -43,6 +43,8 @@ def fixlinks(ROOT_DIR='./out/'):
         include_hidden=True
     )
 
+    cache = {}
+
     bar = Bar('Fixing links...', max=len(md_files),
               suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
 
@@ -71,7 +73,7 @@ def fixlinks(ROOT_DIR='./out/'):
             if ('http' in link):
                 continue
 
-            """ 1st Step - rewrite all the %253A to / """
+            # """ 1st Step - rewrite all the %253A to / """
             replacement_link = link.replace('.html', '')
             replacement_link = replacement_link.replace('%253A', '/')
 
@@ -87,23 +89,32 @@ def fixlinks(ROOT_DIR='./out/'):
             """ 2nd Step - fix the relative paths after file directory cleaning """
 
             # Gets the only the filename
-            tail = path.split(link)[1]
+            tail = path.split(link)[1].replace('.html', '.md').replace('%253A', '\\')
             parent_dir = path.split(filename)[0] or ROOT_DIR
+
+            linked_file = cache.get(tail)
 
             # Get the referenced file from the list of files after the cleaning
             # and it should give us the new path location
             # It will also try to resolve files using only it's filename
             # instead of trying to follow it's whole pathname
-            r = re.compile(re.escape(f'{replacement_link}|{tail}$'))
-            linked_file = list(filter(r.match, files))
-            
-            # If the link is not a file in our file list
-            # then ignore it
-            if len(linked_file) == 0:
-                continue
-            
-            parent_regex = re.compile(re.escape('^' + parent_dir.replace('\\','/')))
-            same_dir = list(filter(r.match, linked_file))
+            if linked_file is None:
+                r = f'{re.escape(tail)}$|{re.escape(replacement_link)}$'
+                # print(r)
+                linked_file = [
+                    x for x in files
+                    if re.search(r, x)
+                ]
+
+                # If the link is not a file in our file list
+                # then ignore it
+                if (len(linked_file) == 0):
+                    continue
+
+                cache[tail] = linked_file
+
+            parent_regex = re.compile('^' + re.escape(parent_dir.replace('\\', '/')))
+            same_dir = list(filter(parent_regex.search, linked_file))
 
             # makes sure that
             # the path is absolute
