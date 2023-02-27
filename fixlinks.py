@@ -94,35 +94,18 @@ def fixlinks(ROOT_DIR='./out/'):
             # and it should give us the new path location
             # It will also try to resolve files using only it's filename
             # instead of trying to follow it's whole pathname
-            linked_file = [
-                x for x in files
-                if replacement_link in x or
-                re.match(re.compile(re.escape(f'{tail}$')), x)
-            ]
-
+            r = re.compile(re.escape(f'{replacement_link}|{tail}$'))
+            linked_file = list(filter(r.match, files))
+            
             # If the link is not a file in our file list
             # then ignore it
             if len(linked_file) == 0:
                 continue
+            
+            parent_regex = re.compile(re.escape('^' + parent_dir.replace('\\','/')))
+            same_dir = list(filter(r.match, linked_file))
 
-            same_dir = [
-                x for x in linked_file
-                if re.match(
-                    re.compile(
-                        re.escape('^' + parent_dir.replace('\\', '/'))
-                    ),
-                    x
-                )
-            ]
-
-            # ? The below issue is fixed as of this commit
-            # ! Current issue:
-            # ! When it's not in the same directory
-            # ! the relpath somehow grabs it straight out
-            # ! of the odp-portal-maker (the link is messed up)
-            # ! for no reason...
-
-            # These two lines makes sure that
+            # makes sure that
             # the path is absolute
             file_loc = resolve_path(ROOT_DIR + (same_dir or linked_file)[0])
 
