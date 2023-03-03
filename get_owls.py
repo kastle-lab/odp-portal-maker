@@ -49,13 +49,15 @@ def get_owls(ROOT_DIR):
 
             except Exception as e:
                 print('Failed to retrieve from ' + link)
-                failed.append(link)
+                failed.append((filename, link))
 
         # bar.next()
 
     print('Done!')
+    print()
     print(f'Failed retrievals: {len(failed)}')
-    print('\n'.join(failed))
+    for fail in failed:
+        print(f'{fail[0]}: {fail[1]}')
 
 
 if __name__ == '__main__':

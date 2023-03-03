@@ -76,7 +76,7 @@ def setup_config(OUT_DIR, author='ODPA', desc=None):
 def setup_template(OUT_DIR):
     OUT_DIR = resolve_path(OUT_DIR)
 
-    templates = glob.glob('**/', recursive=True, root_dir=resolve_path('./template'))
+    templates = glob.glob('**/', recursive=True, root_dir=resolve_path('./template'), include_hidden=False)
 
     print('Copying template files...', end='')
 
@@ -86,10 +86,10 @@ def setup_template(OUT_DIR):
 
     index_template = read_file('./template/index.md')
 
-    dirs = glob.glob('**/', recursive=True, root_dir=OUT_DIR)
+    dirs = glob.glob('**/', recursive=True, root_dir=OUT_DIR, include_hidden=False)
     dirs.append(path.join('/'))
 
-    excludes = ['_layouts', 'public']
+    excludes = ['_layouts', 'public', '.git']
 
     for directory in dirs:
 
@@ -117,7 +117,7 @@ def setup_template(OUT_DIR):
         ]
 
         # weed out hidden files and config files
-        nested = [d for d in nested if not d.startswith('_') or not d.startswith('.')]
+        nested = [d for d in nested if not d.startswith('_') and not d.startswith('.')]
 
         files = [str(f).replace(OUT_DIR, '').replace(directory, '') for f in files]
 
@@ -129,6 +129,9 @@ def setup_template(OUT_DIR):
             links += f'[{d}/](./{d}/)  \n'
 
         for f in files:
+            if f.startswith('.') or f.startswith('_'):
+                continue
+            
             links += f'[{f}](./{f})  \n'
 
         with open(
