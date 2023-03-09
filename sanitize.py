@@ -77,5 +77,4 @@ def sanitize(file: str) -> str:
     </html>
 
     """
-
-    return BeautifulSoup(rebuild, 'html.parser').prettify()
+    return rebuild
