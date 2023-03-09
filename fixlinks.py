@@ -112,6 +112,7 @@ def fixlinks(ROOT_DIR='./out/'):
                     continue
 
                 cache[tail] = linked_file
+                files = [x for x in files if x not in linked_file]
 
             parent_regex = re.compile('^' + re.escape(parent_dir.replace('\\', '/')))
             same_dir = list(filter(parent_regex.search, linked_file))
