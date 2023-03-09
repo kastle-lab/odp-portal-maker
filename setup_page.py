@@ -126,12 +126,12 @@ def setup_template(OUT_DIR):
             if d.startswith('.') or d.startswith('_') or d.count('/') >= 1:
                 continue
 
-            links += f'[{d}/](./{d}/)  \n'
+            links += f'[{d}/](./{d}/{d})  \n'
 
         for f in files:
             if f.startswith('.') or f.startswith('_'):
                 continue
-            
+
             links += f'[{f}](./{f})  \n'
 
         with open(
