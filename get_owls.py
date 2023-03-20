@@ -1,7 +1,9 @@
 import argparse
 import glob
+import json
 import re
 import urllib.request
+from json import JSONEncoder
 from os import path
 from shutil import copy2
 
@@ -14,11 +16,13 @@ from utils import read_file, resolve_path
 def get_owls(ROOT_DIR):
     ROOT_DIR = resolve_path(ROOT_DIR)
 
+    print("Starting up...")
+
     # We are using fake chrome browser agent header to trick some links that blocks non-browser requests
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'
     }
-    timeout = 5
+    timeout = 15
 
     files = glob.glob(
         '**/*.md',
@@ -45,7 +49,7 @@ def get_owls(ROOT_DIR):
         for _i, link in enumerate(links):
             if 'http' not in link:
                 continue
-            
+
             bar.count += 1
             bar.message = f'Resolving {_i + 1}/{len(links)} in {tail if len(tail) < 15 else "current file"}'
             bar.suffix = f'%(percent).1f%% - [{bar.count}] %(elapsed)ds'
@@ -58,6 +62,12 @@ def get_owls(ROOT_DIR):
             excepted = True
 
             try:
+
+                if cache.get(link):
+                    copy2(cache.get(link), file_output)
+                    excepted = False
+                    continue
+
                 # Use a 15 sec timeout
                 response = requests.get(link, timeout=timeout)
 
@@ -77,11 +87,6 @@ def get_owls(ROOT_DIR):
                 # for now (maybe it is the best?)
                 if not any(map(str(response.content).__contains__, ['http://www.w3.org/2002/07/owl', 'owl'])):
                     raise Exception()
-                
-                if cache.get(link):
-                    copy2(cache.get(link), file_output)
-                    excepted = False
-                    continue
 
                 with open(file_output, 'wb') as f:
                     f.write(response.content)
@@ -98,10 +103,23 @@ def get_owls(ROOT_DIR):
                 if not excepted:
                     continue
 
-                if failed.get(link):
-                    failed[link].append(filename)
-                else:
-                    failed[link] = [filename]
+                parsed_table = re.findall(r'\|\s*Submitted\s*by.*?\|.+?\|', file_content, flags=re.IGNORECASE)
+                authors = []
+                if (parsed_table):
+                    found = re.findall(r'\[.*?\]', ','.join(parsed_table))
+                    authors = [author.replace('[', '').replace(']', '') for author in found]
+
+                failed_link = failed.get(link) or {
+                    'link': link,
+                    'file': set(),
+                    'authors': set()
+                }
+                failed[link] = failed_link
+
+                failed_link['authors'].update(authors)
+                failed_link['file'].add(tail)
+                break
+
         bar.next()
 
     bar.finish()
@@ -111,6 +129,21 @@ def get_owls(ROOT_DIR):
     print(f'Failed retrievals: {len(failed)}')
     for fail in failed.keys():
         print(f'{fail}')
+
+    with open('failed.json', 'w') as f:
+        serialized = json.dumps(failed, default=encoder, indent=4)
+        f.write(serialized)
+
+
+def encoder(obj):
+    try:
+
+        return obj.toJSON()
+    except:
+        if isinstance(obj, set):
+            return list(obj)
+
+        return obj.__dict__
 
 
 if __name__ == '__main__':
@@ -130,5 +163,3 @@ if __name__ == '__main__':
     root = args.input
 
     get_owls(root)
-
-    # x = 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl'

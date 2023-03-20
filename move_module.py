@@ -26,7 +26,7 @@ def move_module(ROOT_DIR, OUT_DIR, module, exclude_dir):
 
     # Progress Bar
     bar = Bar('Moving modules', max=len(files),
-              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for file in files:
         # Make sure the parent folder of the file is created (ignored if exists)

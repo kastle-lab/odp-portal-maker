@@ -31,7 +31,7 @@ def import_required_files(ROOT_DIR, SRC_DIR):
     )
 
     bar = Bar('Importing necessary files', max=len(out_files),
-              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for filename in out_files:
         if path.isdir(filename):

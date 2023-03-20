@@ -31,7 +31,7 @@ def cleandir(ROOT_DIR='./out/', TARGET_DIR=None) -> None:
 
     cleanup_bar = Bar('Cleaning Directory',
                       max=len(paths),
-                      suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds'
+                      suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds'
                       )
 
     for p in paths:

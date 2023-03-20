@@ -79,7 +79,7 @@ def organize_dir(ROOT_DIR, group_filters):
             files.remove(matching_file)
 
     bar = Bar('Organizing Files...', max=len(files),
-              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for file in files:
         if path.isdir(ROOT_DIR + file):

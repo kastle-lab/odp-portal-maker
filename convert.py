@@ -60,7 +60,7 @@ def convert(ROOT_DIR, TARGET_DIR) -> None:
         include_hidden=True
     )
 
-    bar = Bar('Converting', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+    bar = Bar('Converting', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for idx, file in enumerate(files):
 

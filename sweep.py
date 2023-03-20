@@ -15,7 +15,7 @@ def clean_trash(ROOT_DIR):
         recursive=True,
     )
 
-    bar = Bar('Cleaning', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+    bar = Bar('Cleaning', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for file in files:
         try:
@@ -40,7 +40,7 @@ def clean_appledouble(ROOT_DIR):
         include_hidden=True
     )
 
-    bar = Bar('Cleaning', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+    bar = Bar('Cleaning', max=len(files), suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for file in files:
 

@@ -46,7 +46,7 @@ def fixlinks(ROOT_DIR='./out/'):
     cache = {}
 
     bar = Bar('Fixing links...', max=len(md_files),
-              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(eta)ds')
+              suffix='%(percent).1f%% - [%(index)d of %(max)d] - %(elapsed)ds')
 
     for filename in md_files:
 
