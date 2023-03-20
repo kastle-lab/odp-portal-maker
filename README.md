@@ -190,6 +190,17 @@ Arguments:
 | input | directory where the page is located |
 
 Example:
+
 ```bash
 python setup_page.py ../patterns-repository
+```
+
+## Create Issues
+
+`create_issues.py` | in order to use this script, there needs to be a `.env` file containing the GitHub API key that has access to the repository.
+
+Example `.env` file:
+
+```
+GITHUB_API_TOKEN=secret_github_api_key
 ```
